@@ -1,0 +1,15 @@
+{
+  "name": "my-project",
+  "version": "1.0.0",
+  "description": "A mobile health application that connects patients in Rwanda with nearby healthcare facilities and provides real-time doctor availability information. The goal is to reduce patient waiting times and improve healthcare accessibility, particularly in Kigali.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
