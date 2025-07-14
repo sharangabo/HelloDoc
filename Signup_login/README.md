@@ -2,7 +2,7 @@
 
 A cross-platform Flutter application for booking medical appointments, with multi-language support and a modern, user-friendly interface.
 
----
+
 
 ## 📖 Description
 
@@ -16,14 +16,14 @@ A cross-platform Flutter application for booking medical appointments, with mult
 
 The app is built with Flutter and Firebase, supporting Android, iOS, and web platforms.
 
----
+
 
 ## 🔗 GitHub Repository
 
-[GitHub Repo Link](https://github.com/your-username/your-repo-name)
-*Replace with your actual repository URL.*
+[GitHub Repo Link](https://github.com/sharangabo/HelloDoc)
 
----
+
+
 
 ## ⚙️ Setup & Installation
 
@@ -62,7 +62,7 @@ The app is built with Flutter and Firebase, supporting Android, iOS, and web pla
    - For iOS: `flutter run`
    - For Web: `flutter run -d chrome`
 
----
+
 
 ## 🎨 Designs
 
@@ -75,11 +75,11 @@ The app is built with Flutter and Firebase, supporting Android, iOS, and web pla
 
 | Login Screen | Home Dashboard | Appointment Booking |
 |--------------|---------------|--------------------|
-| ![Login](screenshots/login.png) | ![Home](screenshots/home.png) | ![Booking](screenshots/booking.png) |
+| ![Login]() | ![Home]() | ![Booking]() |
 
-*Add your screenshots in a `screenshots/` folder and update the paths above.*
 
----
+
+
 
 ## 🛠️ Deployment Plan
 
@@ -100,7 +100,7 @@ The app is built with Flutter and Firebase, supporting Android, iOS, and web pla
 4. **Continuous Integration (Optional):**
    - Set up GitHub Actions or other CI/CD tools for automated builds and tests.
 
----
+
 
 ## 📄 License
 
