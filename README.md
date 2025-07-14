@@ -75,7 +75,7 @@ The app is built with Flutter and Firebase, supporting Android, iOS, and web pla
 
 | Login Screen | Home Dashboard | Appointment Booking |
 |--------------|---------------|--------------------|
-| ![Login](screenshots/login.png) | ![Home](screenshots/home.png) | ![Booking](screenshots/booking.png) |
+| ![Login]() | ![Home]() | ![Booking]() |
 
 *Add your screenshots in a `screenshots/` folder and update the paths above.*
 
