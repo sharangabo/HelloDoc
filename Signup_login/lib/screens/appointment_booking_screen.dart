@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
-import '../models/appointment.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/hospital.dart';
 
 class AppointmentBookingScreen extends StatefulWidget {
-  const AppointmentBookingScreen({Key? key}) : super(key: key);
+  final Hospital hospital;
+  const AppointmentBookingScreen({Key? key, required this.hospital}) : super(key: key);
 
   @override
   State<AppointmentBookingScreen> createState() => _AppointmentBookingScreenState();
@@ -24,68 +25,15 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
     'Dr. Eric Niyonzima',
   ];
 
-  Future<void> _pickDateTime() async {
-    final date = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-    if (date == null) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (time == null) return;
-    setState(() {
-      _selectedDateTime = DateTime(
-        date.year,
-        date.month,
-        date.day,
-        time.hour,
-        time.minute,
-      );
-    });
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate() || _selectedDateTime == null) return;
-    setState(() { _isSubmitting = true; });
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-    final appointmentId = FirebaseDatabase.instance.ref().push().key ?? '';
-    final appointment = Appointment(
-      id: appointmentId,
-      userId: user.uid,
-      doctorName: _selectedDoctor!,
-      dateTime: _selectedDateTime!,
-      reason: _reasonController.text.trim(),
-      status: 'pending',
-    );
-    await FirebaseDatabase.instance
-        .ref('appointments/${user.uid}/$appointmentId')
-        .set(appointment.toMap());
-    setState(() { _isSubmitting = false; });
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Appointment Booked'),
-        content: const Text('Your appointment has been booked successfully.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.of(context).pop();
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Book Appointment')),
+        body: const Center(child: Text('You must be signed in to book an appointment.')),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Book Appointment')),
       body: Padding(
@@ -94,6 +42,8 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
           key: _formKey,
           child: ListView(
             children: [
+              Text('Hospital: ${widget.hospital.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 value: _selectedDoctor,
                 items: _doctors.map((doctor) => DropdownMenuItem(
@@ -140,6 +90,62 @@ class _AppointmentBookingScreenState extends State<AppointmentBookingScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Future<void> _pickDateTime() async {
+    final date = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+    );
+    if (date == null) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+    if (time == null) return;
+    setState(() {
+      _selectedDateTime = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
+    });
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate() || _selectedDateTime == null) return;
+    setState(() { _isSubmitting = true; });
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    await FirebaseFirestore.instance.collection('appointments').add({
+      'userId': user.uid,
+      'hospitalId': widget.hospital.id,
+      'doctorName': _selectedDoctor!,
+      'dateTime': _selectedDateTime!.toIso8601String(),
+      'reason': _reasonController.text.trim(),
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+    setState(() { _isSubmitting = false; });
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Appointment Booked'),
+        content: const Text('Your appointment has been booked successfully.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            },
+            child: const Text('OK'),
+          ),
+        ],
       ),
     );
   }
