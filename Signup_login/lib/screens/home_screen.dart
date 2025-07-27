@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/hospital.dart';
 import 'hospital_details_screen.dart';
+import 'dart:math' show cos, sqrt, asin;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -27,6 +29,48 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
   String selectedCategory = 'Hospital';
   String searchQuery = '';
+  Position? _userPosition;
+  bool _locationError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserLocation();
+  }
+
+  Future<void> _getUserLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        setState(() { _locationError = true; });
+        return;
+      }
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          setState(() { _locationError = true; });
+          return;
+        }
+      }
+      if (permission == LocationPermission.deniedForever) {
+        setState(() { _locationError = true; });
+        return;
+      }
+      final pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      setState(() { _userPosition = pos; _locationError = false; });
+    } catch (e) {
+      setState(() { _locationError = true; });
+    }
+  }
+
+  double _calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+    const p = 0.017453292519943295;
+    final a = 0.5 - cos((lat2 - lat1) * p)/2 +
+        cos(lat1 * p) * cos(lat2 * p) *
+        (1 - cos((lon2 - lon1) * p))/2;
+    return 12742 * asin(sqrt(a));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 16),
+            if (_locationError)
+              const Text('Location permission denied or unavailable. Showing unsorted hospitals.'),
             // Hospital list from Firestore
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
@@ -113,11 +159,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                     return const Center(child: Text('No hospitals found.'));
                   }
-                  final hospitals = snapshot.data!.docs
+                  var hospitals = snapshot.data!.docs
                       .map((doc) => Hospital.fromMap(doc.data() as Map<String, dynamic>))
                       .where((h) => h.category == selectedCategory &&
                           (searchQuery.isEmpty || h.name.toLowerCase().contains(searchQuery.toLowerCase())))
                       .toList();
+                  if (_userPosition != null) {
+                    hospitals.sort((a, b) {
+                      final d1 = _calculateDistance(_userPosition!.latitude, _userPosition!.longitude, a.latitude, a.longitude);
+                      final d2 = _calculateDistance(_userPosition!.latitude, _userPosition!.longitude, b.latitude, b.longitude);
+                      return d1.compareTo(d2);
+                    });
+                  }
                   if (hospitals.isEmpty) {
                     return const Center(child: Text('No hospitals match your search.'));
                   }
@@ -125,12 +178,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: hospitals.length,
                     itemBuilder: (context, index) {
                       final hospital = hospitals[index];
+                      double? distanceKm;
+                      if (_userPosition != null) {
+                        distanceKm = _calculateDistance(_userPosition!.latitude, _userPosition!.longitude, hospital.latitude, hospital.longitude);
+                      }
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: ListTile(
                           leading: const Icon(Icons.local_hospital, color: Colors.red),
                           title: Text(hospital.name),
-                          subtitle: Text(hospital.address),
+                          subtitle: Text(hospital.address + (distanceKm != null ? '  •  ${distanceKm.toStringAsFixed(2)} km' : '')),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
