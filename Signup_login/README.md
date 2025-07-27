@@ -114,27 +114,23 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - All references to "HelloDoc" in the UI and codebase have been updated to reflect the new name and branding.
 
 ### New & Improved Functionality
+- **Nearby Hospitals:**  
+  - Instantly see hospitals and clinics near your current location, sorted by distance.
 - **Modern Authentication:**  
   - Sign up and sign in with Email/Password, Google, and Phone Number (using Firebase Authentication).
   - Terms and Conditions agreement required during sign up.
-
 - **Navigation Drawer & Categories:**  
   - A new navigation drawer provides quick access to hospital categories such as Hospital, Ambulance, Blood Test, Free Eye Checkup, Dental Clinic, Blood Bank, Eye Specialist, Skin Doctor, Pet Specialist, Lab, Clinics, and Medical Records.
-
 - **Hospital Search & Filtering:**  
   - Search bar and filter chips allow users to quickly find hospitals and services by type.
-
 - **Hospital List & Details:**  
-  - View a list of nearby hospitals with name, address, rating, and quick actions.
+  - View a list of nearby hospitals (sorted by distance) with name, address, rating, and quick actions.
   - Detailed hospital pages show address, phone, website, rating, estimated distance, travel time, opening hours, and user reviews.
   - "Get Directions" button opens navigation in Google Maps.
-
 - **User Reviews:**  
   - Users can read and submit reviews for hospitals.
-
 - **Dark Mode:**  
   - Full support for light and dark themes, with a toggle available throughout the app.
-
 - **Appointment Booking:**  
   - The appointment booking feature is retained and refactored to fit the new UI and data model.
 
